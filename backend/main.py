@@ -75,9 +75,27 @@ def registration(user:UserCreate,db:Session = Depends(get_db)):
             "error":str(e)
         }
 
-# @app.post
-# def login(user:login,db: Session = Depends(get_db)):
-#     try:
-#         email_should_exist = db.query(User).filter(
-#             User.email == 
-#         )
+@app.post("/login")
+def login(user:login,db: Session = Depends(get_db)):
+    try:
+        email_should_exist = db.query(User).filter(
+            User.email == user.email
+        ).first()
+
+        if not email_should_exist:
+            return {
+                "message":"Email is invalid or email not exist",
+                "success":False
+            }
+        
+        check_password = pwd_context.verify(user.password,User.password)
+        if not check_password:
+            return{
+                 "message":"Password is invalid",
+                "success":False,
+            }
+            
+    except Exception as e:
+        return{
+            "error":str(e)
+        }
