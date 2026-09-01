@@ -3,11 +3,15 @@ from database import engine,get_db,Base
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from models.user import User
-from schemas.userSchema import UserCreate,login
+from schemas.userSchema import UserCreate,UserLogin
 from passlib.context import CryptContext
+
+from routes.userRoutes import user_router
 pwd_context = CryptContext(schemes=["bcrypt"])
 app = FastAPI( title="Trade-Flow")
 Base.metadata.create_all(bind=engine)
+
+
 @app.get("/")
 def test():
     return {
@@ -31,9 +35,9 @@ def test_database():
             "error":str(e)
         }
         
-@app.post("/register")
-def registration(user:UserCreate,db:Session = Depends(get_db)):
-    try:
+# @app.post("/register")
+# def registration(user:UserCreate,db:Session = Depends(get_db)):
+    # try:
         existing_user = db.query(User).filter(
             User.email == user.email
         ).first()
@@ -70,13 +74,13 @@ def registration(user:UserCreate,db:Session = Depends(get_db)):
             "role": new_user.role
             }
         }
-    except Exception as e:
+    # except Exception as e:
         return{
             "error":str(e)
         }
 
 @app.post("/login")
-def login(user:login,db: Session = Depends(get_db)):
+def login(user:UserLogin,db: Session = Depends(get_db)):
     try:
         email_should_exist = db.query(User).filter(
             User.email == user.email
@@ -88,7 +92,7 @@ def login(user:login,db: Session = Depends(get_db)):
                 "success":False
             }
         
-        check_password = pwd_context.verify(user.password,User.password)
+        check_password = pwd_context.verify(user.password,email_should_exist.password)
         if not check_password:
             return{
                  "message":"Password is invalid",
