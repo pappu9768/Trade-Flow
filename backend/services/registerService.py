@@ -1,12 +1,14 @@
-import UserCreate from schemas.userSchema
-import get_db from database
+from schemas.userSchema import UserCreate 
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from database import get_db
 from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"])
 
-def register_services(user:UserCreate,db:Session = Depends(get_db)):
+def register_service(user:UserCreate,db:Session = Depends(get_db)):
     try:
         #check whether mail exist
-         existing_user = db.query(User).filter(
+        existing_user = db.query(User).filter(
             User.email == user.email
         ).first()
         
